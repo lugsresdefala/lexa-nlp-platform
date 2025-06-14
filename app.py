@@ -20,72 +20,37 @@ load_css()
 render_header()
 
 # Overview Section
-st.markdown("""
-<div class="overview-section">
-    <h2>Sistema Avançado de Análise Linguística</h2>
-    <p class="overview-text">
-        O LEXA oferece análise multidimensional de qualidade textual através de métricas computacionais 
-        sofisticadas, desenvolvido especificamente para contextos acadêmicos e de pesquisa científica.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+st.title("Sistema Avançado de Análise Linguística")
+st.write("""
+O LEXA oferece análise multidimensional de qualidade textual através de métricas computacionais 
+sofisticadas, desenvolvido especificamente para contextos acadêmicos e de pesquisa científica.
+""")
+
+# Add some spacing
+st.write("")
+st.write("")
 
 # Features Grid
+st.subheader("🚀 Recursos Principais")
+st.write("")  # Add spacing after subheader
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown("""
-    <div class="feature-card">
-        <div class="feature-icon icon-primary">
-            <div style="width: 20px; height: 20px; border: 3px solid white; border-radius: 50%;"></div>
-        </div>
-        <h3>Análise Multidimensional</h3>
-        <p class="feature-text">
-            Avaliação através de oito dimensões linguísticas fundamentais para textos acadêmicos e científicos.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### 🔍 Análise Multidimensional")
+    st.write("Avaliação através de oito dimensões linguísticas fundamentais para textos acadêmicos e científicos.")
 
 with col2:
-    st.markdown("""
-    <div class="feature-card">
-        <div class="feature-icon icon-secondary">
-            <div style="width: 24px; height: 16px; border: 2px solid white; border-radius: 4px; position: relative;">
-                <div style="position: absolute; top: 4px; left: 4px; right: 4px; height: 2px; background: white; border-radius: 1px;"></div>
-                <div style="position: absolute; bottom: 4px; left: 4px; right: 8px; height: 2px; background: white; border-radius: 1px;"></div>
-            </div>
-        </div>
-        <h3>Visualizações Avançadas</h3>
-        <p class="feature-text">
-            Dashboards interativos e gráficos tridimensionais para interpretação detalhada dos resultados.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### 📊 Visualizações Avançadas")
+    st.write("Dashboards interativos e gráficos tridimensionais para interpretação detalhada dos resultados.")
 
 with col3:
-    st.markdown("""
-    <div class="feature-card">
-        <div class="feature-icon icon-tertiary">
-            <div style="width: 24px; height: 24px; border: 2px solid white; border-radius: 12px; position: relative;">
-                <div style="position: absolute; top: 6px; left: 6px; width: 8px; height: 8px; background: white; border-radius: 4px;"></div>
-            </div>
-        </div>
-        <h3>Recomendações Precisas</h3>
-        <p class="feature-text">
-            Sugestões específicas para aprimoramento textual baseadas em análise computacional rigorosa.
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("### 💡 Recomendações Precisas")
+    st.write("Sugestões específicas para aprimoramento textual baseadas em análise computacional rigorosa.")
 
 # CTA Section
-st.markdown("""
-<div class="cta-section">
-    <h3 class="cta-title">Inicie sua Análise</h3>
-    <p class="cta-text">
-        Acesse a plataforma principal para começar a análise de seus textos acadêmicos.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+st.header("Inicie sua Análise")
+st.write("Acesse a plataforma principal para começar a análise de seus textos acadêmicos.")
 
 # Sidebar with authentication and settings
 render_auth()

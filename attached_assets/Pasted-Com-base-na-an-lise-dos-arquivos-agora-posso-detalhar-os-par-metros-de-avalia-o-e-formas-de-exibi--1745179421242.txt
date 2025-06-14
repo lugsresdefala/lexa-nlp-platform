@@ -1,0 +1,139 @@
+Com base na análise dos arquivos, agora posso detalhar os parâmetros de avaliação e formas de exibição utilizados no sistema LEXA:
+
+Parâmetros de Avaliação do Sistema LEXA
+1. Dimensões de Análise Textual
+O sistema LEXA analisa textos em 8 dimensões principais, cada uma focada em aspectos específicos da qualidade textual:
+
+1.1. Macro-estrutura argumentativa
+Foco: Sequência lógica, densidade inferencial e progressão temática
+Descrição: Avalia a organização dos argumentos, a densidade de inferências e a progressão lógica do texto
+Métricas: Análise de relações retórico-discursivas (RST), densidade de conectivos argumentativos
+Indicadores específicos: Presença de marcadores argumentativos como "portanto", "assim", "logo", "porque", conectivos contra-argumentativos e expressões de concessão
+1.2. Coesão e coerência
+Foco: Conectividade semântica e sobreposição de modelos situacionais
+Descrição: Analisa as conexões entre orações, parágrafos e seções do texto
+Métricas: Índices de coesão local/global, sobreposição lexical entre sentenças adjacentes
+Indicadores específicos: Uso de conectivos como "além disso", "também", "inclusive", "ou seja", "por exemplo"
+1.3. Sofisticação léxico-gramatical
+Foco: Diversidade, raridade e especificidade terminológica
+Descrição: Avalia a riqueza vocabular e a precisão lexical do texto
+Métricas: Type-token ratio (TTR), Moving-Average Type-Token Ratio (MATTR), hapax legomena ratio
+Indicadores específicos: Presença de vocabulário acadêmico, comprimento médio das palavras, variação lexical
+1.4. Complexidade sintática
+Foco: Profundidade hierárquica e variação construcional
+Descrição: Mede a complexidade das construções frasais e a densidade informacional
+Métricas: Comprimento médio das sentenças, uso de construções passivas, subordinadas e coordenadas
+Indicadores específicos: Variação no comprimento das sentenças, densidade de marcadores de cláusulas
+1.5. Metadiscursividade
+Foco: Engajamento, atitude e marcadores de organização
+Descrição: Analisa como o autor se posiciona, engaja o leitor e organiza o discurso
+Métricas: Quantificação de marcadores interacionais vs. textuais (modelo de Hyland)
+Indicadores específicos: Presença de marcadores de transição, enquadramento, autoreferência e engajamento
+1.6. Intertextualidade
+Foco: Amplitude, equilíbrio e integração de fontes
+Descrição: Avalia a diversidade e relevância das fontes citadas
+Métricas: Detecção de padrões de citação (APA, ABNT), menções a autores
+Indicadores específicos: Densidade de citações, padrões de integrações de fontes, citações de referência
+1.7. Rigor metodológico
+Foco: Reprodutibilidade e explicitação de procedimentos
+Descrição: Verifica a transparência nos métodos e procedimentos descritos
+Métricas: Presença de terminologia metodológica, detalhamento de procedimentos
+Indicadores específicos: Uso de termos como "metodologia", "método", "procedimento", "análise", "dados"
+1.8. Estilo e adequação
+Foco: Convergência entre propósito comunicativo e comunidade discursiva
+Descrição: Analisa adequação do registro ao gênero textual e ao público-alvo
+Métricas: Análise de marcadores de formalidade, uso adequado de pessoa gramatical
+Indicadores específicos: Ausência de coloquialismos, uso apropriado de primeira ou terceira pessoa
+2. Metodologia de Cálculo
+2.1. Processamento inicial
+Limpeza e pré-processamento do texto (remoção de espaços extras, correções de codificação)
+Tokenização em sentenças e palavras com mecanismos de robustez para lidar com erros
+Detecção automática do idioma (português ou inglês)
+2.2. Algoritmos de pontuação
+Cada dimensão recebe uma pontuação entre 0 e 1
+Os algoritmos combinam múltiplas métricas específicas para cada dimensão
+As pontuações brutas são normalizadas com base em estatísticas de corpus de referência (z-score + função sigmóide)
+As pontuações finais são ajustadas para ficarem entre 0,05 e 0,95
+2.3. Ponderação de componentes
+Cada dimensão utiliza uma combinação ponderada de métricas específicas
+Exemplo para Complexidade Sintática:
+30% Pontuação por comprimento de sentença
+30% Pontuação por densidade de cláusulas
+20% Pontuação por variedade estrutural
+20% Pontuação por variação no comprimento de sentença
+3. Formas de Exibição e Visualização
+3.1. Gráfico de Radar
+Função: create_radar_chart() em visualization.py
+Descrição: Mostra as pontuações em todas as dimensões simultaneamente
+Versões: Individual (para um texto) ou comparativa (para múltiplos textos)
+Características visuais: Exibe polígonos preenchidos em um gráfico radial, com cada eixo representando uma dimensão
+3.2. Gráfico de Barras
+Função: create_dimension_bar_chart() em visualization.py
+Descrição: Exibe as pontuações por dimensão em formato de barras horizontais
+Características visuais: Usa escala de cores para destacar pontuações (azul mais escuro para pontuações mais altas)
+Elementos adicionais: Exibe valores numéricos sobre as barras
+3.3. Mapa de Calor Comparativo
+Função: create_comparison_heatmap() em visualization.py
+Descrição: Para comparar múltiplos textos, mostra um mapa de calor com textos nas linhas e dimensões nas colunas
+Características visuais: Escala de cores "Blues" do Plotly, com anotações numéricas em cada célula
+Benefício: Facilita a identificação de padrões e diferenças entre textos
+3.4. Mapa de Calor do Texto
+Função: create_text_heatmap() em visualization.py
+Descrição: Visualiza o texto por sentenças, destacando áreas que precisam de melhorias
+Funcionamento:
+Identifica as 3 dimensões com pontuação mais baixa
+Avalia cada sentença em relação a essas dimensões problemáticas
+Atribui cores (vermelho para problemas, azul para qualidade)
+Características visuais: Mapa de calor linear com índices de sentenças, acompanhado de legenda explicativa
+4. Ferramentas de Comparação e Recomendação
+4.1. Comparação de textos
+Função: compare_texts_detailed() em text_comparator.py
+Características:
+Análise individual de cada texto
+Cálculo de melhorias entre versões (mudanças absolutas e percentuais)
+Identificação de diferenças textuais específicas (adições, remoções, alterações)
+4.2. Identificação de fraquezas comuns
+Função: identify_common_weaknesses() em text_comparator.py
+Funcionamento: Identifica dimensões frequentemente problemáticas em um conjunto de textos
+Resultado: Lista ordenada de fraquezas comuns com seus níveis de severidade
+4.3. Recomendações de melhoria
+Função: recommend_improvements() em text_comparator.py e suggest_edits() em utils.py
+Funcionamento:
+Identifica dimensões com pontuações abaixo de um limiar (0,6)
+Fornece recomendações específicas baseadas na severidade do problema
+Oferece sugestões contextualizadas com base nos padrões detectados no texto
+Características:
+Recomendações classificadas por severidade (alta: < 0,4; média: 0,4-0,6)
+Dicas práticas e aplicáveis para cada dimensão problemática
+Sugestões de edição específicas em nível de sentença
+5. Dados de Referência e Recursos Linguísticos
+5.1. Estatísticas de corpus de referência
+Função: get_reference_corpus_stats() em reference_data.py
+Conteúdo: Médias e desvios-padrão para cada dimensão em um corpus de referência
+Uso: Normalização das pontuações através de z-scores
+5.2. Léxico acadêmico
+Função: get_academic_vocabulary() em reference_data.py
+Conteúdo: Lista de termos acadêmicos em português
+Uso: Avaliação da sofisticação lexical
+5.3. Conectivos formais
+Função: get_formal_connectives() em reference_data.py
+Conteúdo: Dicionário categorizado de conectivos por função (aditivos, adversativos, causais, etc.)
+Uso: Avaliação da estrutura argumentativa e coesão
+5.4. Marcadores metadiscursivos
+Função: get_metadiscourse_markers() em reference_data.py
+Conteúdo: Dicionário categorizado de marcadores metadiscursivos (interativos e interacionais)
+Uso: Avaliação da metadiscursividade
+6. Mecanismos de Robustez
+6.1. Tokenização segura
+Implementação de múltiplos mecanismos de fallback para tokenização
+Correções para problemas conhecidos com o NLTK em português ("punkt_tab")
+Uso de regex como última alternativa para garantir funcionamento básico
+6.2. Detecção de idioma
+Uso primário da biblioteca langdetect
+Mecanismo alternativo baseado em heurísticas simples de frequência de palavras
+Suporte principal para português e inglês
+6.3. Manipulação de erros
+Verificações robustas para textos vazios ou muito curtos
+Tratamento de exceções em todas as etapas críticas
+Valores defaults seguros para casos de falha
+Esta descrição detalhada cobre os principais aspectos do sistema LEXA, suas dimensões de análise e métodos de visualização, proporcionando uma visão abrangente de como o sistema avalia e exibe informações sobre qualidade textual.

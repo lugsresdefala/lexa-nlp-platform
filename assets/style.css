@@ -1,0 +1,204 @@
+/* LEXA - Main Styling */
+
+/* Global Resets and Variables */
+:root {
+    --primary: #45C4AF;
+    --primary-dark: #1a7f76;
+    --secondary: #1e3a5f;
+    --accent: #FFEB85;
+    --text: #ffffff;
+    --text-muted: #cbd5e1;
+    --bg: #0f172a;
+    --bg-card: rgba(30, 58, 95, 0.3);
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(135deg, rgba(69, 196, 175, 0.1), rgba(30, 58, 95, 0.1));
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(69, 196, 175, 0.2);
+    backdrop-filter: blur(10px);
+}
+
+.hero-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2rem;
+}
+
+.hero-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(69, 196, 175, 0.2);
+}
+
+.hero-text h1 {
+    font-size: 3rem;
+    font-weight: 900;
+    margin: 0;
+    background: linear-gradient(135deg, #45C4AF, #1e3a5f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    margin: 0.5rem 0 0 0;
+}
+
+/* Feature Cards */
+.feature-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(69, 196, 175, 0.2);
+    height: 100%;
+    transition: transform 0.2s ease;
+}
+
+.feature-card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.icon-primary {
+    background: var(--primary);
+}
+
+.icon-secondary {
+    background: var(--secondary);
+}
+
+.icon-tertiary {
+    background: var(--accent);
+}
+
+.feature-card h3 {
+    color: var(--text);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+}
+
+.feature-text {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Overview Section */
+.overview-section {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+    border: 1px solid rgba(69, 196, 175, 0.2);
+}
+
+.overview-section h2 {
+    color: var(--text);
+    margin: 0 0 1rem 0;
+    font-size: 1.75rem;
+}
+
+.overview-text {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, rgba(69, 196, 175, 0.2), rgba(30, 58, 95, 0.2));
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+    text-align: center;
+    border: 1px solid rgba(69, 196, 175, 0.3);
+}
+
+.cta-title {
+    color: var(--text);
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+}
+
+.cta-text {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+/* Footer */
+.footer {
+    text-align: center;
+    padding: 2rem 0;
+    margin-top: 4rem;
+    border-top: 1px solid rgba(69, 196, 175, 0.2);
+}
+
+.footer p {
+    color: var(--text-muted);
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+/* Metric Cards */
+.metric-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(69, 196, 175, 0.2);
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Custom Button Styling */
+.custom-button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
+    border: none !important;
+    color: white !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: transform 0.2s ease !important;
+}
+
+.custom-button:hover {
+    transform: translateY(-2px) !important;
+}
+
+/* Animations */
+@keyframes gradient-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}

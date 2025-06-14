@@ -1,0 +1,115 @@
+erDiagram
+    USER ||--o{ TEXT : submits
+    USER {
+        uuid id
+        string name
+        string email
+        jsonb preferences
+        timestamp created_at
+    }
+    
+    TEXT ||--|{ TEXT_SEGMENT : contains
+    TEXT ||--|| TEXT_METADATA : describes
+    TEXT ||--o{ ANALYSIS_RESULT : has
+    TEXT {
+        uuid id
+        uuid user_id
+        string title
+        text content
+        string language
+        string domain
+        timestamp created_at
+        timestamp updated_at
+    }
+    
+    TEXT_SEGMENT {
+        uuid id
+        uuid text_id
+        int sequence
+        text content
+        string segment_type
+    }
+    
+    TEXT_METADATA {
+        uuid id
+        uuid text_id
+        string genre
+        string audience
+        string purpose
+        jsonb custom_parameters
+    }
+    
+    ANALYSIS_RESULT ||--|{ DIMENSION_SCORE : includes
+    ANALYSIS_RESULT ||--o{ ANNOTATION : contains
+    ANALYSIS_RESULT ||--o{ RECOMMENDATION : generates
+    ANALYSIS_RESULT {
+        uuid id
+        uuid text_id
+        uuid analyzer_version
+        float overall_score
+        jsonb raw_metrics
+        timestamp created_at
+    }
+    
+    DIMENSION_SCORE {
+        uuid id
+        uuid analysis_id
+        string dimension
+        string metric
+        float raw_score
+        float normalized_score
+        float percentile
+        jsonb metadata
+    }
+    
+    ANNOTATION {
+        uuid id
+        uuid analysis_id
+        uuid segment_id
+        string issue_type
+        string metric_name
+        int severity
+        float score
+        float expected_score
+        text description
+        jsonb context
+    }
+    
+    RECOMMENDATION {
+        uuid id
+        uuid analysis_id
+        string title
+        text description
+        int priority
+        float potential_improvement
+        jsonb segments_affected
+        jsonb remediation_suggestions
+    }
+    
+    REFERENCE_CORPUS ||--|{ REFERENCE_TEXT : contains
+    REFERENCE_CORPUS {
+        uuid id
+        string name
+        string domain
+        string language
+        jsonb metadata
+    }
+    
+    REFERENCE_TEXT {
+        uuid id
+        uuid corpus_id
+        string title
+        text content
+        jsonb annotations
+        jsonb quality_metrics
+    }
+    
+    METRIC_DEFINITION {
+        uuid id
+        string name
+        string dimension
+        string description
+        jsonb parameters
+        jsonb normalization_rules
+        jsonb validation_data
+    }

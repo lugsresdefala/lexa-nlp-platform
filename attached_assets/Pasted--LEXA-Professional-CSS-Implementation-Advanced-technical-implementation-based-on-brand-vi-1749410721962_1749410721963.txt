@@ -1,0 +1,1043 @@
+/**
+ * LEXA Professional CSS Implementation
+ * Advanced technical implementation based on brand visual identity
+ * Optimized for performance, accessibility, and visual hierarchy
+ */
+
+/* ========================================
+   DESIGN SYSTEM FOUNDATION
+   ======================================== */
+
+:root {
+  /* === LEXA BRAND COLOR SYSTEM === */
+  /* Extracted from official LEXA visual identity */
+  
+  /* Primary Navy System - Background gradients */
+  --lexa-navy-950: #020617;    /* Deepest background */
+  --lexa-navy-900: #0f172a;    /* Primary deep navy */
+  --lexa-navy-800: #1e293b;    /* Medium dark navy */
+  --lexa-navy-700: #334155;    /* Lighter navy */
+  --lexa-navy-600: #475569;    /* Mid-tone navy */
+  --lexa-navy-500: #64748b;    /* Light navy */
+  
+  /* Cyan Accent System - Primary brand color */
+  --lexa-cyan-600: #0891b2;    /* Deep cyan */
+  --lexa-cyan-500: #06b6d4;    /* Primary cyan */
+  --lexa-cyan-400: #22d3ee;    /* Bright cyan */
+  --lexa-cyan-300: #67e8f9;    /* Light cyan */
+  --lexa-cyan-200: #a5f3fc;    /* Very light cyan */
+  --lexa-cyan-100: #cffafe;    /* Ultra light cyan */
+  
+  /* Teal Network System - Connection elements */
+  --lexa-teal-600: #0d9488;    /* Deep teal */
+  --lexa-teal-500: #14b8a6;    /* Primary teal */
+  --lexa-teal-400: #2dd4bf;    /* Bright teal */
+  --lexa-teal-300: #5eead4;    /* Light teal */
+  
+  /* Gold Node System - Accent highlights */
+  --lexa-gold-600: #d97706;    /* Deep gold */
+  --lexa-gold-500: #f59e0b;    /* Primary gold */
+  --lexa-gold-400: #fbbf24;    /* Bright gold */
+  --lexa-gold-300: #fcd34d;    /* Light gold */
+  --lexa-gold-200: #fef3c7;    /* Very light gold */
+  
+  /* Neutral System - Text and surfaces */
+  --lexa-white: #ffffff;
+  --lexa-gray-50: #f8fafc;
+  --lexa-gray-100: #f1f5f9;
+  --lexa-gray-200: #e2e8f0;
+  --lexa-gray-300: #cbd5e1;
+  --lexa-gray-400: #94a3b8;
+  --lexa-gray-500: #64748b;
+  --lexa-gray-600: #475569;
+  --lexa-gray-700: #334155;
+  --lexa-gray-800: #1e293b;
+  --lexa-gray-900: #0f172a;
+  
+  /* === ADVANCED GRADIENT SYSTEM === */
+  /* Complex gradients matching LEXA brand depth */
+  --lexa-gradient-primary: linear-gradient(
+    135deg,
+    var(--lexa-navy-900) 0%,
+    var(--lexa-navy-800) 25%,
+    var(--lexa-navy-700) 50%,
+    var(--lexa-cyan-600) 75%,
+    var(--lexa-cyan-500) 100%
+  );
+  
+  --lexa-gradient-hero: radial-gradient(
+    ellipse 1200px 600px at 50% 0%,
+    var(--lexa-navy-800) 0%,
+    var(--lexa-navy-900) 50%,
+    var(--lexa-navy-950) 100%
+  ), linear-gradient(
+    160deg,
+    var(--lexa-navy-950) 0%,
+    var(--lexa-navy-900) 30%,
+    var(--lexa-navy-800) 60%,
+    var(--lexa-cyan-600) 90%,
+    var(--lexa-cyan-500) 100%
+  );
+  
+  --lexa-gradient-card: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 250, 252, 0.9) 50%,
+    rgba(241, 245, 249, 0.85) 100%
+  );
+  
+  --lexa-gradient-glass: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  
+  --lexa-gradient-text: linear-gradient(
+    135deg,
+    var(--lexa-white) 0%,
+    var(--lexa-cyan-200) 50%,
+    var(--lexa-cyan-300) 100%
+  );
+  
+  --lexa-gradient-accent: linear-gradient(
+    90deg,
+    var(--lexa-cyan-500) 0%,
+    var(--lexa-teal-500) 50%,
+    var(--lexa-gold-500) 100%
+  );
+  
+  /* === TYPOGRAPHY SYSTEM === */
+  /* Professional typography hierarchy */
+  --font-display: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  
+  /* Font sizes with perfect scale ratio (1.250) */
+  --text-xs: 0.64rem;       /* 10.24px */
+  --text-sm: 0.8rem;        /* 12.8px */
+  --text-base: 1rem;        /* 16px */
+  --text-lg: 1.25rem;       /* 20px */
+  --text-xl: 1.563rem;      /* 25px */
+  --text-2xl: 1.953rem;     /* 31.25px */
+  --text-3xl: 2.441rem;     /* 39.06px */
+  --text-4xl: 3.052rem;     /* 48.83px */
+  --text-5xl: 3.815rem;     /* 61.04px */
+  --text-6xl: 4.768rem;     /* 76.29px */
+  --text-7xl: 5.96rem;      /* 95.37px */
+  
+  /* Line heights for optimal readability */
+  --leading-none: 1;
+  --leading-tight: 1.25;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --leading-loose: 2;
+  
+  /* Font weights */
+  --font-thin: 100;
+  --font-extralight: 200;
+  --font-light: 300;
+  --font-normal: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+  --font-black: 900;
+  
+  /* === SPACING SYSTEM === */
+  /* Perfect scale spacing system */
+  --space-px: 1px;
+  --space-0: 0;
+  --space-0-5: 0.125rem;    /* 2px */
+  --space-1: 0.25rem;       /* 4px */
+  --space-1-5: 0.375rem;    /* 6px */
+  --space-2: 0.5rem;        /* 8px */
+  --space-2-5: 0.625rem;    /* 10px */
+  --space-3: 0.75rem;       /* 12px */
+  --space-3-5: 0.875rem;    /* 14px */
+  --space-4: 1rem;          /* 16px */
+  --space-5: 1.25rem;       /* 20px */
+  --space-6: 1.5rem;        /* 24px */
+  --space-7: 1.75rem;       /* 28px */
+  --space-8: 2rem;          /* 32px */
+  --space-9: 2.25rem;       /* 36px */
+  --space-10: 2.5rem;       /* 40px */
+  --space-11: 2.75rem;      /* 44px */
+  --space-12: 3rem;         /* 48px */
+  --space-14: 3.5rem;       /* 56px */
+  --space-16: 4rem;         /* 64px */
+  --space-18: 4.5rem;       /* 72px */
+  --space-20: 5rem;         /* 80px */
+  --space-24: 6rem;         /* 96px */
+  --space-28: 7rem;         /* 112px */
+  --space-32: 8rem;         /* 128px */
+  --space-36: 9rem;         /* 144px */
+  --space-40: 10rem;        /* 160px */
+  --space-44: 11rem;        /* 176px */
+  --space-48: 12rem;        /* 192px */
+  --space-52: 13rem;        /* 208px */
+  --space-56: 14rem;        /* 224px */
+  --space-60: 15rem;        /* 240px */
+  --space-64: 16rem;        /* 256px */
+  --space-72: 18rem;        /* 288px */
+  --space-80: 20rem;        /* 320px */
+  --space-96: 24rem;        /* 384px */
+  
+  /* === BORDER RADIUS SYSTEM === */
+  --radius-none: 0;
+  --radius-sm: 0.125rem;    /* 2px */
+  --radius-DEFAULT: 0.25rem; /* 4px */
+  --radius-md: 0.375rem;    /* 6px */
+  --radius-lg: 0.5rem;      /* 8px */
+  --radius-xl: 0.75rem;     /* 12px */
+  --radius-2xl: 1rem;       /* 16px */
+  --radius-3xl: 1.5rem;     /* 24px */
+  --radius-4xl: 2rem;       /* 32px */
+  --radius-full: 9999px;
+  
+  /* === SHADOW SYSTEM === */
+  /* Sophisticated shadow hierarchy */
+  --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-DEFAULT: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-2xl: 0 50px 100px -20px rgba(0, 0, 0, 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  
+  /* LEXA-specific glass shadows */
+  --shadow-glass: 0 8px 32px 0 rgba(15, 23, 42, 0.15);
+  --shadow-glass-lg: 0 20px 60px 0 rgba(15, 23, 42, 0.2);
+  --shadow-glow: 0 0 20px rgba(6, 182, 212, 0.3);
+  --shadow-glow-lg: 0 0 40px rgba(6, 182, 212, 0.4);
+  
+  /* === TRANSITION SYSTEM === */
+  /* Smooth, professional transitions */
+  --transition-none: none;
+  --transition-all: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-DEFAULT: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-colors: color 150ms cubic-bezier(0.4, 0, 0.2, 1), 
+                       background-color 150ms cubic-bezier(0.4, 0, 0.2, 1), 
+                       border-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-opacity: opacity 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-shadow: box-shadow 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-transform: transform 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Custom easing functions */
+  --ease-in-out-back: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-in-quart: cubic-bezier(0.5, 0, 0.75, 0);
+  
+  /* === Z-INDEX SYSTEM === */
+  --z-0: 0;
+  --z-10: 10;
+  --z-20: 20;
+  --z-30: 30;
+  --z-40: 40;
+  --z-50: 50;
+  --z-auto: auto;
+  --z-dropdown: 1000;
+  --z-sticky: 1020;
+  --z-fixed: 1030;
+  --z-modal-backdrop: 1040;
+  --z-modal: 1050;
+  --z-popover: 1060;
+  --z-tooltip: 1070;
+  --z-toast: 1080;
+}
+
+/* ========================================
+   BASE STYLES & RESET
+   ======================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  line-height: 1.5;
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-normal);
+  line-height: var(--leading-normal);
+  color: var(--lexa-gray-900);
+  background: var(--lexa-gradient-hero);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ========================================
+   LEXA HERO SECTION
+   ======================================== */
+
+.lexa-hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--lexa-gradient-hero);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.lexa-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: 
+    /* Ambient light effects */
+    radial-gradient(circle 800px at 20% 30%, rgba(6, 182, 212, 0.15) 0%, transparent 60%),
+    radial-gradient(circle 600px at 80% 20%, rgba(20, 184, 166, 0.12) 0%, transparent 50%),
+    radial-gradient(circle 400px at 60% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 40%),
+    /* Texture overlay */
+    linear-gradient(45deg, rgba(255, 255, 255, 0.02) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.02) 25%, transparent 25%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 20px 20px, 20px 20px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lexa-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(15, 23, 42, 0.1) 50%,
+    rgba(15, 23, 42, 0.3) 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lexa-hero-content {
+  position: relative;
+  z-index: 10;
+  text-align: center;
+  max-width: 1200px;
+  padding: var(--space-8);
+}
+
+/* ========================================
+   LEXA LOGO COMPONENT
+   ======================================== */
+
+.lexa-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  margin-bottom: var(--space-12);
+  perspective: 1000px;
+}
+
+.lexa-logo-icon {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(145deg, var(--lexa-cyan-500), var(--lexa-teal-500));
+  border-radius: var(--radius-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 
+    var(--shadow-glass-lg),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 0 40px rgba(6, 182, 212, 0.3);
+  transform-style: preserve-3d;
+  transition: transform 400ms var(--ease-out-expo);
+  isolation: isolate;
+}
+
+.lexa-logo-icon::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent);
+  border-radius: var(--radius-2xl);
+  z-index: 1;
+}
+
+.lexa-logo-icon::after {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(
+    circle at 30% 30%,
+    var(--lexa-gold-400) 8%,
+    transparent 12%
+  ), radial-gradient(
+    circle at 70% 30%,
+    var(--lexa-gold-400) 8%,
+    transparent 12%
+  ), radial-gradient(
+    circle at 50% 70%,
+    var(--lexa-gold-400) 8%,
+    transparent 12%
+  );
+  z-index: 2;
+  filter: drop-shadow(0 2px 8px rgba(245, 158, 11, 0.4));
+}
+
+.lexa-logo-icon:hover {
+  transform: rotateY(15deg) rotateX(10deg) translateZ(20px);
+  box-shadow: 
+    var(--shadow-2xl),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    0 0 60px rgba(6, 182, 212, 0.5);
+}
+
+.lexa-logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-7xl);
+  font-weight: var(--font-black);
+  line-height: var(--leading-none);
+  letter-spacing: -0.04em;
+  position: relative;
+  background: var(--lexa-gradient-text);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5));
+}
+
+.lexa-logo-text::before {
+  content: attr(data-text);
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  z-index: -1;
+  background: linear-gradient(135deg, var(--lexa-navy-800), var(--lexa-navy-900));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.6;
+}
+
+.lexa-logo-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: -2;
+  background: var(--lexa-navy-950);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.3;
+}
+
+/* ========================================
+   LEXA TAGLINE
+   ======================================== */
+
+.lexa-tagline {
+  font-size: var(--text-2xl);
+  font-weight: var(--font-light);
+  color: var(--lexa-gray-200);
+  margin-bottom: var(--space-16);
+  letter-spacing: 0.025em;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: var(--leading-relaxed);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* ========================================
+   ADVANCED BUTTON SYSTEM
+   ======================================== */
+
+.lexa-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-8);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  line-height: var(--leading-tight);
+  text-decoration: none;
+  border: none;
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  transition: all 300ms var(--ease-out-expo);
+  white-space: nowrap;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.lexa-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transition: opacity 300ms var(--ease-out-expo);
+  z-index: -1;
+}
+
+.lexa-btn-primary {
+  background: linear-gradient(135deg, var(--lexa-cyan-500), var(--lexa-teal-500));
+  color: var(--lexa-white);
+  box-shadow: 
+    var(--shadow-lg),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.lexa-btn-primary::before {
+  background: linear-gradient(135deg, var(--lexa-cyan-400), var(--lexa-teal-400));
+  opacity: 0;
+}
+
+.lexa-btn-primary:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 
+    var(--shadow-2xl),
+    inset 0 1px 2px rgba(255, 255, 255, 0.2),
+    var(--shadow-glow-lg);
+}
+
+.lexa-btn-primary:hover::before {
+  opacity: 1;
+}
+
+.lexa-btn-secondary {
+  background: var(--lexa-gradient-glass);
+  color: var(--lexa-gray-800);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-glass);
+}
+
+.lexa-btn-secondary::before {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 0;
+}
+
+.lexa-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glass-lg);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.lexa-btn-secondary:hover::before {
+  opacity: 1;
+}
+
+/* Button sizes */
+.lexa-btn-sm {
+  padding: var(--space-2-5) var(--space-6);
+  font-size: var(--text-sm);
+  gap: var(--space-2);
+}
+
+.lexa-btn-lg {
+  padding: var(--space-5) var(--space-10);
+  font-size: var(--text-lg);
+  gap: var(--space-4);
+}
+
+/* ========================================
+   ADVANCED CARD SYSTEM
+   ======================================== */
+
+.lexa-card {
+  position: relative;
+  background: var(--lexa-gradient-card);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-3xl);
+  padding: var(--space-8);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: var(--shadow-glass);
+  transition: all 400ms var(--ease-out-expo);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.lexa-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--lexa-gradient-accent);
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out-expo);
+}
+
+.lexa-card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent);
+  border-radius: calc(var(--radius-3xl) - 1px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.lexa-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: var(--shadow-2xl);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.lexa-card:hover::before {
+  opacity: 1;
+}
+
+.lexa-card-title {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--lexa-gray-900);
+  margin-bottom: var(--space-3);
+  line-height: var(--leading-tight);
+}
+
+.lexa-card-subtitle {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--lexa-gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--space-6);
+}
+
+.lexa-card-content {
+  color: var(--lexa-gray-700);
+  line-height: var(--leading-relaxed);
+  font-size: var(--text-base);
+}
+
+/* ========================================
+   NAVIGATION SYSTEM
+   ======================================== */
+
+.lexa-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: var(--z-fixed);
+  background: rgba(15, 23, 42, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: var(--space-4) 0;
+  transition: all 300ms var(--ease-out-expo);
+}
+
+.lexa-nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.lexa-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  text-decoration: none;
+  transition: transform 200ms var(--ease-out-expo);
+}
+
+.lexa-nav-logo:hover {
+  transform: scale(1.05);
+}
+
+.lexa-nav-logo-icon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, var(--lexa-cyan-500), var(--lexa-teal-500));
+  border-radius: var(--radius-xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+
+.lexa-nav-logo-icon::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), transparent);
+  border-radius: calc(var(--radius-xl) - 2px);
+}
+
+.lexa-nav-logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--font-bold);
+  color: var(--lexa-white);
+  letter-spacing: -0.02em;
+}
+
+/* ========================================
+   FORM SYSTEM
+   ======================================== */
+
+.lexa-form-group {
+  margin-bottom: var(--space-6);
+}
+
+.lexa-label {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--lexa-gray-700);
+  margin-bottom: var(--space-2);
+  line-height: var(--leading-tight);
+}
+
+.lexa-input {
+  width: 100%;
+  padding: var(--space-4) var(--space-5);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  color: var(--lexa-gray-900);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(203, 213, 225, 0.5);
+  border-radius: var(--radius-xl);
+  transition: all 200ms var(--ease-out-expo);
+  outline: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.lexa-input:focus {
+  border-color: var(--lexa-cyan-500);
+  box-shadow: 
+    0 0 0 3px rgba(6, 182, 212, 0.1),
+    var(--shadow-md);
+  background: var(--lexa-white);
+  transform: translateY(-1px);
+}
+
+.lexa-textarea {
+  resize: vertical;
+  min-height: 120px;
+  line-height: var(--leading-relaxed);
+}
+
+/* ========================================
+   ADVANCED ANIMATIONS
+   ======================================== */
+
+@keyframes lexaFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lexaFloating {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(-1deg);
+  }
+}
+
+@keyframes lexaGlow {
+  0%, 100% {
+    box-shadow: 
+      var(--shadow-lg),
+      0 0 20px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    box-shadow: 
+      var(--shadow-xl),
+      0 0 40px rgba(6, 182, 212, 0.5);
+  }
+}
+
+@keyframes lexaSlideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes lexaSlideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Animation classes */
+.lexa-animate-fade-in {
+  animation: lexaFadeInUp 0.8s var(--ease-out-expo);
+}
+
+.lexa-animate-floating {
+  animation: lexaFloating 4s ease-in-out infinite;
+}
+
+.lexa-animate-glow {
+  animation: lexaGlow 3s ease-in-out infinite;
+}
+
+.lexa-animate-slide-left {
+  animation: lexaSlideInLeft 0.6s var(--ease-out-expo);
+}
+
+.lexa-animate-slide-right {
+  animation: lexaSlideInRight 0.6s var(--ease-out-expo);
+}
+
+/* ========================================
+   LAYOUT SYSTEM
+   ======================================== */
+
+.lexa-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+}
+
+.lexa-grid {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.lexa-grid-1 { grid-template-columns: repeat(1, 1fr); }
+.lexa-grid-2 { grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); }
+.lexa-grid-3 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.lexa-grid-4 { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Display utilities */
+.flex { display: flex; }
+.grid { display: grid; }
+.hidden { display: none; }
+.block { display: block; }
+.inline { display: inline; }
+.inline-block { display: inline-block; }
+
+/* Flexbox utilities */
+.items-center { align-items: center; }
+.items-start { align-items: flex-start; }
+.items-end { align-items: flex-end; }
+.justify-center { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.justify-around { justify-content: space-around; }
+.justify-end { justify-content: flex-end; }
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+/* Color utilities */
+.text-white { color: var(--lexa-white); }
+.text-gray-600 { color: var(--lexa-gray-600); }
+.text-gray-800 { color: var(--lexa-gray-800); }
+.text-cyan-500 { color: var(--lexa-cyan-500); }
+
+/* Background utilities */
+.bg-gradient-primary { background: var(--lexa-gradient-primary); }
+.bg-gradient-hero { background: var(--lexa-gradient-hero); }
+
+/* Spacing utilities */
+.mb-4 { margin-bottom: var(--space-4); }
+.mb-6 { margin-bottom: var(--space-6); }
+.mb-8 { margin-bottom: var(--space-8); }
+.mt-8 { margin-top: var(--space-8); }
+.px-6 { padding-left: var(--space-6); padding-right: var(--space-6); }
+.py-4 { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .lexa-hero-content {
+    padding: var(--space-6);
+  }
+  
+  .lexa-logo {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  
+  .lexa-logo-icon {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .lexa-logo-text {
+    font-size: var(--text-5xl);
+  }
+  
+  .lexa-tagline {
+    font-size: var(--text-lg);
+  }
+  
+  .lexa-grid-2,
+  .lexa-grid-3,
+  .lexa-grid-4 {
+    grid-template-columns: 1fr;
+  }
+  
+  .lexa-nav-container {
+    padding: 0 var(--space-4);
+  }
+  
+  .lexa-container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .lexa-logo-text {
+    font-size: var(--text-6xl);
+  }
+  
+  .lexa-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .lexa-hero-content {
+    padding: var(--space-12);
+  }
+  
+  .lexa-container {
+    padding: 0 var(--space-8);
+  }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* Focus styles */
+.lexa-btn:focus-visible,
+.lexa-input:focus-visible {
+  outline: 3px solid var(--lexa-cyan-400);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .lexa-card {
+    border: 2px solid var(--lexa-gray-800);
+    background: var(--lexa-white);
+  }
+  
+  .lexa-btn-secondary {
+    border: 2px solid var(--lexa-gray-800);
+  }
+}
+
+/* Screen reader only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* GPU acceleration for animations */
+.lexa-logo-icon,
+.lexa-btn,
+.lexa-card {
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-perspective: 1000;
+  perspective: 1000;
+}
+
+/* Optimized gradients */
+.lexa-gradient-optimized {
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* Layer promotion for smooth animations */
+.lexa-animated {
+  will-change: transform, opacity;
+}
+
+/* Content visibility for performance */
+.lexa-content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}

@@ -19,14 +19,10 @@ render_auth()
 language, domain, genre, audience = render_sidebar()
 
 # Main content
-st.markdown("""
-<div class="overview-section">
-    <h2>Análise de Texto</h2>
-    <p class="overview-text">
-        Cole seu texto abaixo para iniciar a análise linguística multidimensional.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+st.header("📝 Análise de Texto")
+st.write("")  # Add spacing
+st.write("Cole seu texto abaixo para iniciar a análise linguística multidimensional.")
+st.write("")  # Add spacing before text area
 
 # Text input
 text_input = st.text_area(
@@ -37,33 +33,20 @@ text_input = st.text_area(
 )
 
 # Analysis options
+st.subheader("Opções de Análise")
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("""
-    <div class="feature-card">
-        <h3>Opções de Análise</h3>
-        <div style="margin-top: 1rem;">
-    """, unsafe_allow_html=True)
-    
+    st.markdown("#### Análise Básica")
     analyze_cohesion = st.checkbox("Coesão Textual", value=True)
     analyze_coherence = st.checkbox("Coerência", value=True)
     analyze_adequacy = st.checkbox("Adequação ao Gênero", value=True)
-    
-    st.markdown("</div></div>", unsafe_allow_html=True)
 
 with col2:
-    st.markdown("""
-    <div class="feature-card">
-        <h3>Métricas Avançadas</h3>
-        <div style="margin-top: 1rem;">
-    """, unsafe_allow_html=True)
-    
+    st.markdown("#### Métricas Avançadas")
     analyze_complexity = st.checkbox("Complexidade Linguística", value=True)
     analyze_style = st.checkbox("Estilo e Registro", value=True)
     analyze_intertextuality = st.checkbox("Intertextualidade", value=False)
-    
-    st.markdown("</div></div>", unsafe_allow_html=True)
 
 # Analysis button
 if st.button("Iniciar Análise", type="primary"):
@@ -78,28 +61,13 @@ if st.button("Iniciar Análise", type="primary"):
             metrics_col1, metrics_col2, metrics_col3 = st.columns(3)
             
             with metrics_col1:
-                st.markdown("""
-                <div class="metric-card">
-                    <div class="metric-value">85%</div>
-                    <div class="metric-label">Coesão Textual</div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.metric("Coesão Textual", "85%")
             
             with metrics_col2:
-                st.markdown("""
-                <div class="metric-card">
-                    <div class="metric-value">78%</div>
-                    <div class="metric-label">Coerência</div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.metric("Coerência", "78%")
             
             with metrics_col3:
-                st.markdown("""
-                <div class="metric-card">
-                    <div class="metric-value">92%</div>
-                    <div class="metric-label">Adequação</div>
-                </div>
-                """, unsafe_allow_html=True)
+                st.metric("Adequação", "92%")
 
 # Footer
 render_footer()

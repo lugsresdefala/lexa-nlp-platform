@@ -1,0 +1,114 @@
+# Framework de Métricas de Qualidade Textual
+
+## Dimensões Fundamentais de Análise
+
+### 1. Coesão Textual
+- **Métricas de Referência Anafórica e Catafórica**
+  - Densidade de elementos coesivos por 100 palavras
+  - Distância média entre referentes e antecedentes
+  - Diversidade de mecanismos coesivos (índice Herfindahl-Hirschman adaptado)
+  - Encadeamento referencial (graph-based analysis)
+
+- **Métricas de Coesão Léxica**
+  - Repetição lexical com ajuste semântico (LSA-enhanced)
+  - Cadeias lexicais com análise de embeddings contextuais
+  - Índice de sobreposição lexical com ponderação TF-IDF
+  - Taxa de variação lexical com normalização por registro linguístico
+
+- **Métricas de Coesão Estrutural**
+  - Análise de marcadores discursivos (frequency & distribution)
+  - Padrões de transição temática (topic modeling + transition analysis)
+  - Coherence relation signaling (RST & PDTB frameworks)
+  - Paralelismo estrutural (syntactic similarity measures)
+
+### 2. Coerência Discursiva
+- **Métricas de Continuidade Tópica**
+  - Centração (Centering Theory metrics)
+  - Entropia tópica normalizada
+  - Coeficiente de permanência tópica
+  - Distância semântica inter-sentencial (cosine similarity em embeddings)
+
+- **Métricas de Progressão Temática**
+  - Padrões de progressão temática (Daneš framework)
+  - Taxa de introdução de novas entidades
+  - Evolução temática (dynamic topic modeling)
+  - Profundidade de desenvolvimento tópico
+
+- **Métricas de Relações Retóricas**
+  - Densidade e distribuição de relações RST
+  - Profundidade da árvore retórica
+  - Balanceamento de relações nucleares e satélites
+  - Complexidade da estrutura retórica (RST-tree complexity)
+
+### 3. Adequação ao Gênero e Registro
+- **Métricas de Conformidade Genérica**
+  - Alinhamento com estruturas retóricas canônicas (score de similaridade)
+  - Distribuição de moves retóricos específicos do gênero
+  - Índice de prototipicidade genérica
+  - Análise de sequências textuais (Adam's framework)
+
+- **Métricas de Registro**
+  - Perfil multidimensional de Biber
+  - Distribuição de características léxico-gramaticais por registro
+  - Índice de formalidade textual (baseado em corpus)
+  - Adequação da densidade informacional ao registro
+
+### 4. Precisão e Clareza
+- **Métricas de Precisão Terminológica**
+  - Consistência terminológica (variação não justificada)
+  - Adequação terminológica ao domínio (baseado em ontologias)
+  - Precisão semântica (avaliação contra knowledge bases)
+  - Índice de ambiguidade controlada
+
+- **Métricas de Clareza Estrutural**
+  - Complexidade sintática ponderada pelo gênero
+  - Distância média de dependências sintáticas
+  - Proporção de estruturas aninhadas
+  - Índice de clareza proposicional
+
+### 5. Complexidade Linguística Contextualizada
+- **Métricas de Complexidade Léxica**
+  - TTR com ajuste para tamanho textual (MATTR, MTLD)
+  - Densidade lexical adaptativa
+  - Sofisticação lexical contextualizada ao domínio
+  - Índice de abstração lexical (corpus-based)
+
+- **Métricas de Complexidade Sintática**
+  - Comprimento médio de T-units com ajuste
+  - Índice de subordinação ponderado
+  - Distância de dependência sintática média
+  - Variação sintática (entropy-based)
+
+- **Métricas de Densidade Informacional**
+  - Proporção tipo-ocorrência lexical por segmento
+  - Densidade proposicional (baseada em frames semânticos)
+  - Compressão informacional (information-theoretic approach)
+  - Índice de condensação semântica
+
+## Implementação e Validação
+
+### Validação Científica
+Todas as métricas implementadas devem ser validadas através de:
+
+1. **Validação Correlacional**
+   - Correlação com avaliações humanas especializadas (r > 0.75)
+   - Concordância entre avaliadores especialistas (Fleiss' κ > 0.80)
+   - Validade convergente com métricas estabelecidas (r > 0.70)
+
+2. **Validação Experimental**
+   - Estudos de discriminação entre textos de qualidade diferencial
+   - Análise de corpus contrastivos com anotação de qualidade
+   - Experimentos de sensibilidade a manipulações textuais específicas
+
+3. **Validação Ecológica**
+   - Adequação a textos autênticos de diversos domínios
+   - Robustez a variações estilísticas e disciplinares
+   - Aplicabilidade cross-cultural e multilíngue
+
+### Normalização Contextual
+Todas as métricas devem ser normalizadas considerando:
+
+- Gênero textual e convenções disciplinares
+- Nível de especialização do público-alvo
+- Propósito comunicativo do texto
+- Domínio de conhecimento específico

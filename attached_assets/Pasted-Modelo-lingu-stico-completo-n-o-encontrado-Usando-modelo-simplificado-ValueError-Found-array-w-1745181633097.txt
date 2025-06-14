@@ -1,0 +1,31 @@
+Modelo linguístico completo não encontrado. Usando modelo simplificado.
+
+ValueError: Found array with 0 feature(s) (shape=(1, 0)) while a minimum of 1 is required by check_pairwise_arrays.
+Traceback:
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/exec_code.py", line 121, in exec_func_with_error_handling
+    result = func()
+             ^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/streamlit/runtime/scriptrunner/script_runner.py", line 640, in code_to_exec
+    exec(code, module.__dict__)
+File "/home/runner/workspace/app.py", line 146, in <module>
+    main()
+File "/home/runner/workspace/app.py", line 77, in main
+    st.session_state.metrics = calculate_metrics(
+                               ^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/utils/metrics.py", line 56, in calculate_metrics
+    "score": (calculate_referential_cohesion(doc) + calculate_topic_continuity(doc) + calculate_lexical_cohesion(doc)) / 3,
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/utils/metrics.py", line 553, in calculate_topic_continuity
+    sim = pairwise.cosine_similarity(
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sklearn/utils/_param_validation.py", line 216, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sklearn/metrics/pairwise.py", line 1741, in cosine_similarity
+    X, Y = check_pairwise_arrays(X, Y)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sklearn/metrics/pairwise.py", line 200, in check_pairwise_arrays
+    X = check_array(
+        ^^^^^^^^^^^^
+File "/home/runner/workspace/.pythonlibs/lib/python3.11/site-packages/sklearn/utils/validation.py", line 1139, in check_array
+    raise ValueError(

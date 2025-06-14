@@ -1,0 +1,19 @@
+# Ignore Python cache directories
+__pycache__/
+.pytest_cache/
+
+# Ignore virtual environment directories
+venv/
+.env/
+.env*/
+ENV/
+env/
+.venv/
+
+# Ignore local database files
+lexa.db
+*.sqlite
+
+# Ignore git hook samples
+.git/hooks/*.sample
+.env

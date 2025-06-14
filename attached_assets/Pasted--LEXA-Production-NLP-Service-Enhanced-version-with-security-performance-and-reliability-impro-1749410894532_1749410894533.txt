@@ -1,0 +1,906 @@
+"""
+LEXA Production NLP Service
+Enhanced version with security, performance, and reliability improvements
+"""
+
+import asyncio
+import hashlib
+import logging
+import os
+import pickle
+import time
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from functools import lru_cache
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import aiohttp
+import bleach
+import numpy as np
+import redis.asyncio as redis
+import torch
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from pydantic import BaseModel, Field, validator
+from prometheus_client import Counter, Histogram, Gauge, make_asgi_app
+import uvicorn
+
+# NLP Libraries with lazy loading
+import spacy
+from transformers import (
+    BertTokenizer, BertModel, AutoTokenizer, pipeline
+)
+from sentence_transformers import SentenceTransformer
+import yake
+import language_tool_python
+import textstat
+
+# Enhanced logging configuration
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler('lexa_nlp.log')
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# Prometheus metrics
+nlp_requests = Counter('nlp_requests_total', 'Total NLP requests', ['service', 'method'])
+nlp_duration = Histogram('nlp_request_duration_seconds', 'NLP request duration', ['service', 'method'])
+nlp_errors = Counter('nlp_errors_total', 'Total NLP errors', ['service', 'error_type'])
+model_memory_usage = Gauge('nlp_model_memory_bytes', 'Memory usage by models', ['model_name'])
+cache_hits = Counter('nlp_cache_hits_total', 'Cache hits')
+cache_misses = Counter('nlp_cache_misses_total', 'Cache misses')
+
+@dataclass
+class ProductionNLPConfig:
+    """Production-ready configuration with environment support"""
+    
+    # Model configurations
+    spacy_model: str = os.getenv('SPACY_MODEL', 'pt_core_news_lg')
+    bert_model: str = os.getenv('BERT_MODEL', 'neuralmind/bert-base-portuguese-cased')
+    sbert_model: str = os.getenv('SBERT_MODEL', 'ricardo-filho/bert-base-portuguese-cased-nli-assin-2')
+    
+    # Infrastructure
+    redis_url: str = os.getenv('REDIS_URL', 'redis://localhost:6379')
+    redis_password: Optional[str] = os.getenv('REDIS_PASSWORD')
+    redis_ssl: bool = os.getenv('REDIS_SSL', 'false').lower() == 'true'
+    
+    # Performance
+    max_text_length: int = int(os.getenv('MAX_TEXT_LENGTH', '10000'))
+    batch_size: int = int(os.getenv('BATCH_SIZE', '32'))
+    cache_ttl: int = int(os.getenv('CACHE_TTL', '3600'))
+    max_workers: int = int(os.getenv('MAX_WORKERS', str(os.cpu_count() or 4)))
+    
+    # Security
+    rate_limit_requests: int = int(os.getenv('RATE_LIMIT_REQUESTS', '100'))
+    rate_limit_window: int = int(os.getenv('RATE_LIMIT_WINDOW', '60'))
+    
+    # Device configuration
+    device: str = "cuda" if torch.cuda.is_available() else "cpu"
+    gpu_memory_fraction: float = float(os.getenv('GPU_MEMORY_FRACTION', '0.7'))
+    
+    def __post_init__(self):
+        """Validate configuration after initialization"""
+        if self.max_text_length > 50000:
+            logger.warning("Very large max_text_length may cause memory issues")
+        
+        if self.redis_ssl and not self.redis_password:
+            raise ValueError("Redis password required when SSL is enabled")
+
+class CircuitBreaker:
+    """Circuit breaker pattern for external service calls"""
+    
+    def __init__(self, failure_threshold: int = 5, timeout: int = 60):
+        self.failure_threshold = failure_threshold
+        self.timeout = timeout
+        self.failure_count = 0
+        self.last_failure_time: Optional[datetime] = None
+        self.state = 'CLOSED'  # CLOSED, OPEN, HALF_OPEN
+        self._lock = asyncio.Lock()
+    
+    async def call(self, func, *args, **kwargs):
+        """Execute function with circuit breaker protection"""
+        async with self._lock:
+            if self.state == 'OPEN':
+                if datetime.now() - self.last_failure_time > timedelta(seconds=self.timeout):
+                    self.state = 'HALF_OPEN'
+                    logger.info("Circuit breaker moving to HALF_OPEN state")
+                else:
+                    raise Exception("Circuit breaker is OPEN - service unavailable")
+        
+        try:
+            result = await func(*args, **kwargs)
+            await self._on_success()
+            return result
+        except Exception as e:
+            await self._on_failure()
+            raise
+    
+    async def _on_success(self):
+        async with self._lock:
+            self.failure_count = 0
+            self.state = 'CLOSED'
+    
+    async def _on_failure(self):
+        async with self._lock:
+            self.failure_count += 1
+            self.last_failure_time = datetime.now()
+            
+            if self.failure_count >= self.failure_threshold:
+                self.state = 'OPEN'
+                logger.error(f"Circuit breaker OPEN after {self.failure_count} failures")
+
+class ModelManager:
+    """Handles model loading and lifecycle with lazy loading"""
+    
+    def __init__(self, config: ProductionNLPConfig):
+        self.config = config
+        self._models: Dict[str, Any] = {}
+        self._loading_locks: Dict[str, asyncio.Lock] = {}
+        self._executor = ThreadPoolExecutor(max_workers=2)
+    
+    async def get_model(self, model_name: str) -> Any:
+        """Get model with lazy loading"""
+        if model_name not in self._models:
+            if model_name not in self._loading_locks:
+                self._loading_locks[model_name] = asyncio.Lock()
+            
+            async with self._loading_locks[model_name]:
+                if model_name not in self._models:
+                    logger.info(f"Loading model: {model_name}")
+                    self._models[model_name] = await self._load_model(model_name)
+                    
+                    # Update memory metrics
+                    if torch.cuda.is_available() and hasattr(self._models[model_name], 'parameters'):
+                        memory_bytes = sum(p.numel() * p.element_size() for p in self._models[model_name].parameters())
+                        model_memory_usage.labels(model_name=model_name).set(memory_bytes)
+        
+        return self._models[model_name]
+    
+    async def _load_model(self, model_name: str) -> Any:
+        """Load specific model asynchronously"""
+        loop = asyncio.get_event_loop()
+        
+        if model_name == 'spacy':
+            return await loop.run_in_executor(self._executor, self._load_spacy)
+        elif model_name == 'bert_tokenizer':
+            return await loop.run_in_executor(self._executor, self._load_bert_tokenizer)
+        elif model_name == 'bert_model':
+            return await loop.run_in_executor(self._executor, self._load_bert_model)
+        elif model_name == 'sbert':
+            return await loop.run_in_executor(self._executor, self._load_sbert)
+        elif model_name == 'language_tool':
+            return await loop.run_in_executor(self._executor, self._load_language_tool)
+        elif model_name == 'keyword_extractor':
+            return await loop.run_in_executor(self._executor, self._load_keyword_extractor)
+        else:
+            raise ValueError(f"Unknown model: {model_name}")
+    
+    def _load_spacy(self):
+        """Load spaCy model with custom components"""
+        try:
+            nlp = spacy.load(self.config.spacy_model)
+            
+            # Add custom components
+            if 'language_detector' not in nlp.pipe_names:
+                from spacy_langdetect import LanguageDetector
+                nlp.add_pipe(LanguageDetector(), name='language_detector', last=True)
+            
+            return nlp
+        except OSError as e:
+            logger.error(f"Failed to load spaCy model {self.config.spacy_model}: {e}")
+            logger.info("Attempting to download model...")
+            os.system(f"python -m spacy download {self.config.spacy_model}")
+            return spacy.load(self.config.spacy_model)
+    
+    def _load_bert_tokenizer(self):
+        return BertTokenizer.from_pretrained(self.config.bert_model)
+    
+    def _load_bert_model(self):
+        model = BertModel.from_pretrained(self.config.bert_model)
+        model.to(self.config.device)
+        model.eval()
+        return model
+    
+    def _load_sbert(self):
+        return SentenceTransformer(self.config.sbert_model)
+    
+    def _load_language_tool(self):
+        return language_tool_python.LanguageTool('pt-BR')
+    
+    def _load_keyword_extractor(self):
+        return yake.KeywordExtractor(
+            lan="pt", n=3, dedupLim=0.7, dedupFunc='seqm',
+            windowsSize=1, top=20
+        )
+
+class CacheManager:
+    """Redis-based cache manager with async support"""
+    
+    def __init__(self, config: ProductionNLPConfig):
+        self.config = config
+        self.redis_client: Optional[redis.Redis] = None
+        self._connection_lock = asyncio.Lock()
+    
+    async def get_client(self) -> redis.Redis:
+        """Get Redis client with connection pooling"""
+        if self.redis_client is None:
+            async with self._connection_lock:
+                if self.redis_client is None:
+                    self.redis_client = redis.from_url(
+                        self.config.redis_url,
+                        password=self.config.redis_password,
+                        ssl=self.config.redis_ssl,
+                        socket_connect_timeout=5,
+                        socket_timeout=5,
+                        retry_on_timeout=True,
+                        health_check_interval=30,
+                        max_connections=20
+                    )
+        return self.redis_client
+    
+    async def get(self, key: str) -> Optional[Any]:
+        """Get value from cache"""
+        try:
+            client = await self.get_client()
+            cached = await client.get(key)
+            if cached:
+                cache_hits.inc()
+                return pickle.loads(cached)
+            else:
+                cache_misses.inc()
+                return None
+        except Exception as e:
+            logger.error(f"Cache get error: {e}")
+            cache_misses.inc()
+            return None
+    
+    async def set(self, key: str, value: Any, ttl: int = None) -> bool:
+        """Set value in cache"""
+        try:
+            client = await self.get_client()
+            pickled = pickle.dumps(value)
+            ttl = ttl or self.config.cache_ttl
+            await client.setex(key, ttl, pickled)
+            return True
+        except Exception as e:
+            logger.error(f"Cache set error: {e}")
+            return False
+    
+    async def delete(self, key: str) -> bool:
+        """Delete key from cache"""
+        try:
+            client = await self.get_client()
+            await client.delete(key)
+            return True
+        except Exception as e:
+            logger.error(f"Cache delete error: {e}")
+            return False
+
+@dataclass
+class AnalysisResult:
+    """Enhanced analysis result with comprehensive metrics"""
+    text_id: str
+    timestamp: datetime
+    analysis_duration: float
+    
+    # Core analysis
+    tokens: List[Dict[str, Any]]
+    sentences: List[Dict[str, Any]]
+    entities: List[Dict[str, Any]]
+    
+    # Advanced metrics
+    complexity_metrics: Dict[str, float]
+    cohesion_metrics: Dict[str, float]
+    style_metrics: Dict[str, float]
+    readability_metrics: Dict[str, float]
+    
+    # Results
+    keywords: List[Tuple[str, float]]
+    issues: List[Dict[str, Any]]
+    suggestions: List[Dict[str, Any]]
+    
+    # Optional embeddings
+    embeddings: Optional[np.ndarray] = None
+    summary: Optional[str] = None
+
+class InputValidator:
+    """Comprehensive input validation and sanitization"""
+    
+    @staticmethod
+    def validate_and_sanitize_text(text: str, max_length: int = 10000) -> str:
+        """Validate and sanitize input text"""
+        if not isinstance(text, str):
+            raise ValueError("Text must be a string")
+        
+        if len(text.strip()) < 10:
+            raise ValueError("Text must be at least 10 characters long")
+        
+        if len(text) > max_length:
+            raise ValueError(f"Text exceeds maximum length of {max_length} characters")
+        
+        # Remove potentially malicious content
+        cleaned_text = bleach.clean(text, tags=[], attributes={}, strip=True)
+        
+        # Check for repetitive content (potential DoS)
+        words = cleaned_text.split()
+        if len(words) > 10:
+            unique_ratio = len(set(words)) / len(words)
+            if unique_ratio < 0.1:
+                raise ValueError("Text appears to be repetitive spam")
+        
+        # Validate encoding
+        try:
+            cleaned_text.encode('utf-8')
+        except UnicodeEncodeError:
+            raise ValueError("Invalid text encoding")
+        
+        return cleaned_text
+
+class AdvancedNLPAnalyzer:
+    """Core NLP analysis engine with optimized processing"""
+    
+    def __init__(self, model_manager: ModelManager, config: ProductionNLPConfig):
+        self.models = model_manager
+        self.config = config
+        self.circuit_breaker = CircuitBreaker()
+    
+    async def analyze_text_comprehensive(self, text: str) -> AnalysisResult:
+        """Comprehensive text analysis with parallel processing"""
+        start_time = time.time()
+        
+        # Validate input
+        validated_text = InputValidator.validate_and_sanitize_text(text, self.config.max_text_length)
+        
+        # Parallel analysis tasks
+        tasks = [
+            self._analyze_basic_features(validated_text),
+            self._analyze_complexity(validated_text),
+            self._analyze_style(validated_text),
+            self._analyze_readability(validated_text),
+            self._extract_keywords(validated_text)
+        ]
+        
+        try:
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            # Process results
+            basic_features, complexity, style, readability, keywords = results
+            
+            # Handle any exceptions
+            for i, result in enumerate(results):
+                if isinstance(result, Exception):
+                    logger.error(f"Analysis task {i} failed: {result}")
+                    nlp_errors.labels(service='analyzer', error_type=type(result).__name__).inc()
+            
+            # Optional grammar check (may be slow)
+            issues = await self._check_grammar_with_circuit_breaker(validated_text)
+            
+            # Generate suggestions
+            suggestions = self._generate_suggestions(complexity, style, readability, issues)
+            
+            analysis_duration = time.time() - start_time
+            
+            return AnalysisResult(
+                text_id=hashlib.md5(validated_text.encode()).hexdigest(),
+                timestamp=datetime.now(),
+                analysis_duration=analysis_duration,
+                tokens=basic_features.get('tokens', []),
+                sentences=basic_features.get('sentences', []),
+                entities=basic_features.get('entities', []),
+                complexity_metrics=complexity if not isinstance(complexity, Exception) else {},
+                cohesion_metrics={},  # Placeholder for cohesion analysis
+                style_metrics=style if not isinstance(style, Exception) else {},
+                readability_metrics=readability if not isinstance(readability, Exception) else {},
+                keywords=keywords if not isinstance(keywords, Exception) else [],
+                issues=issues,
+                suggestions=suggestions
+            )
+            
+        except Exception as e:
+            logger.error(f"Analysis failed: {e}", exc_info=True)
+            nlp_errors.labels(service='analyzer', error_type=type(e).__name__).inc()
+            raise
+    
+    async def _analyze_basic_features(self, text: str) -> Dict[str, Any]:
+        """Extract basic linguistic features using spaCy"""
+        nlp = await self.models.get_model('spacy')
+        doc = nlp(text)
+        
+        tokens = []
+        for token in doc:
+            tokens.append({
+                'id': token.i,
+                'text': token.text,
+                'lemma': token.lemma_,
+                'pos': token.pos_,
+                'tag': token.tag_,
+                'dep': token.dep_,
+                'is_alpha': token.is_alpha,
+                'is_stop': token.is_stop,
+                'ent_type': token.ent_type_
+            })
+        
+        sentences = []
+        for i, sent in enumerate(doc.sents):
+            sentences.append({
+                'id': i,
+                'text': sent.text,
+                'length': len(sent),
+                'start': sent.start,
+                'end': sent.end
+            })
+        
+        entities = []
+        for ent in doc.ents:
+            entities.append({
+                'text': ent.text,
+                'label': ent.label_,
+                'start': ent.start_char,
+                'end': ent.end_char
+            })
+        
+        return {
+            'tokens': tokens,
+            'sentences': sentences,
+            'entities': entities
+        }
+    
+    async def _analyze_complexity(self, text: str) -> Dict[str, float]:
+        """Analyze text complexity"""
+        sentences = text.split('.')
+        sentences = [s.strip() for s in sentences if s.strip()]
+        
+        if not sentences:
+            return {'complexity_score': 0.0}
+        
+        # Basic complexity metrics
+        avg_sentence_length = np.mean([len(s.split()) for s in sentences])
+        vocabulary_diversity = len(set(text.lower().split())) / len(text.split()) if text.split() else 0
+        
+        return {
+            'avg_sentence_length': avg_sentence_length,
+            'vocabulary_diversity': vocabulary_diversity,
+            'complexity_score': min((avg_sentence_length / 20) + (1 - vocabulary_diversity), 1.0)
+        }
+    
+    async def _analyze_style(self, text: str) -> Dict[str, float]:
+        """Analyze writing style"""
+        # Count passive voice constructions (simplified)
+        passive_indicators = ['foi', 'foram', 'é', 'são', 'estar', 'sendo']
+        words = text.lower().split()
+        passive_count = sum(1 for word in words if word in passive_indicators)
+        passive_ratio = passive_count / len(words) if words else 0
+        
+        # Formality indicators
+        formal_words = ['entretanto', 'contudo', 'ademais', 'outrossim', 'porquanto']
+        informal_words = ['né', 'tá', 'pra', 'cara', 'tipo']
+        
+        formal_count = sum(1 for word in words if word in formal_words)
+        informal_count = sum(1 for word in words if word in informal_words)
+        
+        formality_score = (formal_count - informal_count) / len(words) if words else 0
+        formality_score = max(-1, min(1, formality_score))  # Normalize to [-1, 1]
+        
+        return {
+            'passive_voice_ratio': passive_ratio,
+            'formality_score': formality_score,
+            'word_count': len(words),
+            'unique_word_ratio': len(set(words)) / len(words) if words else 0
+        }
+    
+    async def _analyze_readability(self, text: str) -> Dict[str, float]:
+        """Calculate readability metrics"""
+        try:
+            metrics = {
+                'flesch_reading_ease': textstat.flesch_reading_ease(text),
+                'flesch_kincaid_grade': textstat.flesch_kincaid_grade(text),
+                'avg_sentence_length': textstat.avg_sentence_length(text),
+                'avg_syllables_per_word': textstat.avg_syllables_per_word(text)
+            }
+            
+            # Custom readability score for Portuguese
+            ease_score = metrics['flesch_reading_ease']
+            if ease_score >= 90:
+                readability_level = 'very_easy'
+            elif ease_score >= 80:
+                readability_level = 'easy'
+            elif ease_score >= 70:
+                readability_level = 'fairly_easy'
+            elif ease_score >= 60:
+                readability_level = 'standard'
+            elif ease_score >= 50:
+                readability_level = 'fairly_difficult'
+            elif ease_score >= 30:
+                readability_level = 'difficult'
+            else:
+                readability_level = 'very_difficult'
+            
+            metrics['readability_level'] = readability_level
+            return metrics
+            
+        except Exception as e:
+            logger.error(f"Readability analysis failed: {e}")
+            return {'error': str(e)}
+    
+    async def _extract_keywords(self, text: str) -> List[Tuple[str, float]]:
+        """Extract keywords using YAKE"""
+        try:
+            extractor = await self.models.get_model('keyword_extractor')
+            keywords = extractor.extract_keywords(text)
+            
+            # Normalize scores (YAKE uses lower scores for better keywords)
+            if keywords:
+                max_score = max(kw[1] for kw in keywords)
+                normalized = [(kw[0], 1 - (kw[1] / max_score)) for kw in keywords]
+                return sorted(normalized, key=lambda x: x[1], reverse=True)[:10]
+            
+            return []
+            
+        except Exception as e:
+            logger.error(f"Keyword extraction failed: {e}")
+            return []
+    
+    async def _check_grammar_with_circuit_breaker(self, text: str) -> List[Dict[str, Any]]:
+        """Grammar check with circuit breaker pattern"""
+        try:
+            return await self.circuit_breaker.call(self._check_grammar, text)
+        except Exception as e:
+            logger.warning(f"Grammar check failed (circuit breaker): {e}")
+            return []
+    
+    async def _check_grammar(self, text: str) -> List[Dict[str, Any]]:
+        """Check grammar using LanguageTool"""
+        tool = await self.models.get_model('language_tool')
+        
+        # Limit text length for grammar checking
+        check_text = text[:2000] if len(text) > 2000 else text
+        
+        matches = tool.check(check_text)
+        issues = []
+        
+        for match in matches[:10]:  # Limit to 10 issues
+            issues.append({
+                'type': 'grammar',
+                'message': match.message,
+                'offset': match.offset,
+                'length': match.errorLength,
+                'suggestions': [r.value for r in match.replacements[:3]],
+                'category': match.category
+            })
+        
+        return issues
+    
+    def _generate_suggestions(self, complexity: Dict, style: Dict, 
+                           readability: Dict, issues: List) -> List[Dict]:
+        """Generate writing improvement suggestions"""
+        suggestions = []
+        
+        # Complexity suggestions
+        if isinstance(complexity, dict) and complexity.get('avg_sentence_length', 0) > 25:
+            suggestions.append({
+                'type': 'complexity',
+                'priority': 'medium',
+                'message': 'Considere dividir sentenças muito longas',
+                'details': f'Comprimento médio: {complexity["avg_sentence_length"]:.1f} palavras'
+            })
+        
+        # Style suggestions
+        if isinstance(style, dict) and style.get('passive_voice_ratio', 0) > 0.2:
+            suggestions.append({
+                'type': 'style',
+                'priority': 'medium',
+                'message': 'Reduza o uso de voz passiva',
+                'details': f'Proporção de voz passiva: {style["passive_voice_ratio"]*100:.1f}%'
+            })
+        
+        # Readability suggestions
+        if isinstance(readability, dict) and readability.get('flesch_reading_ease', 100) < 50:
+            suggestions.append({
+                'type': 'readability',
+                'priority': 'high',
+                'message': 'Texto difícil de ler - simplifique a linguagem',
+                'details': f'Nível: {readability.get("readability_level", "unknown")}'
+            })
+        
+        # Grammar issue suggestions
+        if len(issues) > 5:
+            suggestions.append({
+                'type': 'grammar',
+                'priority': 'high',
+                'message': f'Múltiplos problemas gramaticais detectados ({len(issues)})',
+                'details': 'Revise cuidadosamente o texto'
+            })
+        
+        return suggestions
+
+class ProductionNLPService:
+    """Production-ready NLP service with comprehensive features"""
+    
+    def __init__(self, config: ProductionNLPConfig):
+        self.config = config
+        self.model_manager = ModelManager(config)
+        self.cache_manager = CacheManager(config)
+        self.analyzer = AdvancedNLPAnalyzer(self.model_manager, config)
+        
+        # Rate limiting
+        self._rate_limit_store: Dict[str, List[float]] = {}
+        self._rate_limit_lock = asyncio.Lock()
+    
+    async def analyze_text(self, text: str, options: Dict[str, Any] = None, 
+                          client_id: str = None) -> AnalysisResult:
+        """Main text analysis endpoint with caching and rate limiting"""
+        start_time = time.time()
+        
+        # Rate limiting
+        if client_id:
+            await self._check_rate_limit(client_id)
+        
+        # Check cache
+        cache_key = self._get_cache_key(text, options or {})
+        if not options.get('force_refresh', False):
+            cached_result = await self.cache_manager.get(cache_key)
+            if cached_result:
+                logger.info(f"Cache hit for text analysis: {cache_key}")
+                return cached_result
+        
+        try:
+            # Perform analysis
+            result = await self.analyzer.analyze_text_comprehensive(text)
+            
+            # Cache result
+            await self.cache_manager.set(cache_key, result)
+            
+            # Update metrics
+            duration = time.time() - start_time
+            nlp_duration.labels(service='main', method='analyze_text').observe(duration)
+            nlp_requests.labels(service='main', method='analyze_text').inc()
+            
+            logger.info(f"Analysis completed in {duration:.2f}s for {len(text)} characters")
+            return result
+            
+        except Exception as e:
+            nlp_errors.labels(service='main', error_type=type(e).__name__).inc()
+            logger.error(f"Analysis failed: {e}", exc_info=True)
+            raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+    
+    async def _check_rate_limit(self, client_id: str):
+        """Check and enforce rate limiting"""
+        current_time = time.time()
+        
+        async with self._rate_limit_lock:
+            if client_id not in self._rate_limit_store:
+                self._rate_limit_store[client_id] = []
+            
+            # Clean old timestamps
+            cutoff_time = current_time - self.config.rate_limit_window
+            self._rate_limit_store[client_id] = [
+                t for t in self._rate_limit_store[client_id] if t > cutoff_time
+            ]
+            
+            # Check limit
+            if len(self._rate_limit_store[client_id]) >= self.config.rate_limit_requests:
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Rate limit exceeded: {self.config.rate_limit_requests} requests per {self.config.rate_limit_window} seconds"
+                )
+            
+            # Add current request
+            self._rate_limit_store[client_id].append(current_time)
+    
+    def _get_cache_key(self, text: str, options: Dict[str, Any]) -> str:
+        """Generate cache key for text and options"""
+        text_hash = hashlib.md5(text.encode()).hexdigest()
+        options_hash = hashlib.md5(str(sorted(options.items())).encode()).hexdigest()
+        return f"lexa:nlp:analysis:{text_hash}:{options_hash}"
+    
+    async def health_check(self) -> Dict[str, Any]:
+        """Comprehensive health check"""
+        health_status = {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "services": {},
+            "models": {},
+            "metrics": {}
+        }
+        
+        # Check Redis
+        try:
+            client = await self.cache_manager.get_client()
+            await client.ping()
+            health_status["services"]["redis"] = "healthy"
+        except Exception as e:
+            health_status["services"]["redis"] = f"unhealthy: {e}"
+            health_status["status"] = "degraded"
+        
+        # Check critical models
+        critical_models = ['spacy', 'bert_tokenizer']
+        for model_name in critical_models:
+            try:
+                model = await self.model_manager.get_model(model_name)
+                health_status["models"][model_name] = "loaded" if model else "not_loaded"
+            except Exception as e:
+                health_status["models"][model_name] = f"error: {e}"
+                health_status["status"] = "degraded"
+        
+        # System metrics
+        health_status["metrics"] = {
+            "loaded_models": len(self.model_manager._models),
+            "cache_connection": health_status["services"]["redis"] == "healthy",
+            "device": self.config.device
+        }
+        
+        return health_status
+
+# FastAPI Application Setup
+app = FastAPI(
+    title="LEXA Production NLP Service",
+    description="Advanced NLP analysis service with production-ready features",
+    version="2.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
+
+# Middleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=os.getenv("CORS_ORIGINS", "*").split(","),
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Prometheus metrics endpoint
+metrics_app = make_asgi_app()
+app.mount("/metrics", metrics_app)
+
+# Initialize service
+config = ProductionNLPConfig()
+nlp_service = ProductionNLPService(config)
+
+# Request/Response Models
+class TextAnalysisRequest(BaseModel):
+    text: str = Field(..., min_length=10, max_length=50000)
+    options: Dict[str, Any] = Field(default_factory=dict)
+    
+    @validator('text')
+    def validate_text(cls, v):
+        return InputValidator.validate_and_sanitize_text(v)
+
+class TextAnalysisResponse(BaseModel):
+    text_id: str
+    timestamp: str
+    analysis_duration: float
+    dimensions: Dict[str, Any]
+    issues: List[Dict[str, Any]]
+    suggestions: List[Dict[str, Any]]
+    metrics: Dict[str, Any]
+
+# Dependency for client identification
+async def get_client_id(request) -> str:
+    """Extract client ID for rate limiting"""
+    return request.client.host
+
+# API Endpoints
+@app.post("/analyze", response_model=TextAnalysisResponse)
+async def analyze_text_endpoint(
+    request: TextAnalysisRequest,
+    background_tasks: BackgroundTasks,
+    client_id: str = Depends(get_client_id)
+):
+    """Main text analysis endpoint"""
+    try:
+        result = await nlp_service.analyze_text(request.text, request.options, client_id)
+        
+        return TextAnalysisResponse(
+            text_id=result.text_id,
+            timestamp=result.timestamp.isoformat(),
+            analysis_duration=result.analysis_duration,
+            dimensions={
+                'complexity': result.complexity_metrics,
+                'style': result.style_metrics,
+                'readability': result.readability_metrics
+            },
+            issues=result.issues,
+            suggestions=result.suggestions,
+            metrics={
+                'token_count': len(result.tokens),
+                'sentence_count': len(result.sentences),
+                'entity_count': len(result.entities),
+                'keyword_count': len(result.keywords)
+            }
+        )
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+@app.get("/health")
+async def health_check_endpoint():
+    """Health check endpoint"""
+    return await nlp_service.health_check()
+
+@app.get("/health/detailed")
+async def detailed_health_check():
+    """Detailed health check with metrics"""
+    health = await nlp_service.health_check()
+    
+    # Add additional system info
+    health["system"] = {
+        "python_version": f"{__import__('sys').version_info.major}.{__import__('sys').version_info.minor}",
+        "torch_version": torch.__version__,
+        "cuda_available": torch.cuda.is_available(),
+        "device_count": torch.cuda.device_count() if torch.cuda.is_available() else 0
+    }
+    
+    return health
+
+@app.get("/models/status")
+async def models_status():
+    """Get status of all models"""
+    return {
+        "loaded_models": list(nlp_service.model_manager._models.keys()),
+        "available_models": ["spacy", "bert_tokenizer", "bert_model", "sbert", "language_tool", "keyword_extractor"],
+        "device": config.device
+    }
+
+@app.delete("/cache/{cache_key}")
+async def clear_cache_key(cache_key: str):
+    """Clear specific cache key"""
+    success = await nlp_service.cache_manager.delete(cache_key)
+    return {"success": success, "key": cache_key}
+
+# Error handlers
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    """Custom HTTP exception handler"""
+    return {
+        "error": True,
+        "message": exc.detail,
+        "status_code": exc.status_code,
+        "timestamp": datetime.now().isoformat()
+    }
+
+# Application lifecycle
+@app.on_event("startup")
+async def startup_event():
+    """Application startup tasks"""
+    logger.info("Starting LEXA NLP Service...")
+    logger.info(f"Configuration: Device={config.device}, Max workers={config.max_workers}")
+    
+    # Preload critical models
+    try:
+        await nlp_service.model_manager.get_model('spacy')
+        logger.info("Critical models preloaded successfully")
+    except Exception as e:
+        logger.error(f"Failed to preload models: {e}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Application shutdown tasks"""
+    logger.info("Shutting down LEXA NLP Service...")
+    
+    # Close Redis connections
+    if nlp_service.cache_manager.redis_client:
+        await nlp_service.cache_manager.redis_client.close()
+    
+    logger.info("Shutdown complete")
+
+if __name__ == "__main__":
+    # Production server configuration
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", "8080")),
+        workers=1,  # Use 1 worker for model sharing
+        access_log=True,
+        log_level="info"
+    )

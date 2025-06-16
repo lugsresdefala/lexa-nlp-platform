@@ -1,71 +1,152 @@
-/* LEXA - Main Styling */
+/* LEXA - Enhanced Styling */
 
 /* Global Resets and Variables */
 :root {
-    --primary: #45C4AF;
-    --primary-dark: #1a7f76;
-    --secondary: #1e3a5f;
-    --accent: #FFEB85;
+    --primary: #0EA5E9;
+    --primary-dark: #0369A1;
+    --secondary: #1E293B;
+    --accent: #F59E0B;
     --text: #ffffff;
     --text-muted: #cbd5e1;
     --bg: #0f172a;
     --bg-card: rgba(30, 58, 95, 0.3);
 }
 
-/* Hero Section */
+/* Enhanced Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, rgba(69, 196, 175, 0.1), rgba(30, 58, 95, 0.1));
-    border-radius: 16px;
-    padding: 3rem 2rem;
-    margin-bottom: 3rem;
-    border: 1px solid rgba(69, 196, 175, 0.2);
-    backdrop-filter: blur(10px);
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(30, 41, 59, 0.1));
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    margin-bottom: 4rem;
+    border: 1px solid rgba(14, 165, 233, 0.2);
+    backdrop-filter: blur(12px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: fadeIn 0.8s ease-out;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle,
+        rgba(14, 165, 233, 0.1) 0%,
+        transparent 50%
+    );
+    animation: rotate 20s linear infinite;
+}
+
+.hero-section:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.2);
 }
 
 .hero-content {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2rem;
+    gap: 3rem;
+    position: relative;
+    z-index: 1;
 }
 
 .hero-text h1 {
-    font-size: 4rem;
+    font-size: 4.5rem;
     font-weight: 900;
     margin: 0;
-    background: linear-gradient(135deg, #45C4AF, #1e3a5f);
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     letter-spacing: -0.02em;
-    line-height: 1.2;
+    line-height: 1.1;
+    animation: gradient-shift 3s ease infinite;
+    transition: all 0.4s ease;
+}
+
+.hero-text h1:hover {
+    transform: translateY(-2px) scale(1.01);
+    letter-spacing: -0.01em;
 }
 
 .hero-subtitle {
     font-size: 1.5rem;
     color: var(--text-muted);
-    margin: 1rem 0 0 0;
-    line-height: 1.4;
+    margin: 1.5rem 0 0 0;
+    line-height: 1.5;
+    transition: all 0.3s ease;
+    animation: fadeIn 1s ease-out 0.2s backwards;
 }
 
-/* Feature Cards */
+.hero-section:hover .hero-subtitle {
+    color: var(--text);
+    transform: translateY(-1px);
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Enhanced Feature Cards with Dynamic Effects */
 .feature-card {
     background: var(--bg-card);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 2rem;
-    border: 1px solid rgba(69, 196, 175, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: scaleIn 0.6s ease-out;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+                0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
     height: 100%;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    transition: 0.5s;
+}
+
+.feature-card:hover::before {
+    left: 100%;
 }
 
 .feature-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 24px rgba(69, 196, 175, 0.2);
-    border-color: rgba(69, 196, 175, 0.4);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.2),
+                0 10px 10px -5px rgba(14, 165, 233, 0.1);
+    border-color: var(--primary);
+    background: linear-gradient(145deg, 
+        rgba(14, 165, 233, 0.1),
+        rgba(30, 41, 59, 0.2)
+    );
 }
 
+/* Enhanced Feature Icon */
 .feature-icon {
     width: 56px;
     height: 56px;
@@ -73,34 +154,49 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 2rem;
     margin-bottom: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.icon-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+.feature-card:hover .feature-icon {
+    transform: scale(1.2) rotate(5deg);
+    box-shadow: 0 8px 24px rgba(14, 165, 233, 0.2);
 }
 
-.icon-secondary {
-    background: linear-gradient(135deg, var(--secondary), #2a4a7f);
-}
-
-.icon-tertiary {
-    background: linear-gradient(135deg, var(--accent), #ffd700);
-}
-
+/* Enhanced Feature Card Text */
 .feature-card h3 {
     color: var(--text);
-    margin: 0 0 1rem 0;
     font-size: 1.5rem;
     font-weight: 700;
+    margin: 1rem 0;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.feature-text {
+.feature-card:hover h3 {
+    transform: translateY(-2px);
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.025em;
+}
+
+.feature-card p {
     color: var(--text-muted);
+    line-height: 1.6;
     margin: 0;
     font-size: 1rem;
-    line-height: 1.6;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover p {
+    color: var(--text);
+    transform: translateY(-1px);
 }
 
 /* Overview Section */
@@ -131,29 +227,99 @@
     line-height: 1.7;
 }
 
-/* CTA Section */
+/* Enhanced CTA Section */
 .cta-section {
-    background: linear-gradient(135deg, rgba(69, 196, 175, 0.2), rgba(30, 58, 95, 0.2));
-    border-radius: 20px;
-    padding: 3rem;
-    margin: 3rem 0;
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(30, 41, 59, 0.1));
+    border-radius: 24px;
+    padding: 4rem 2rem;
+    margin: 4rem 0;
     text-align: center;
-    border: 1px solid rgba(69, 196, 175, 0.3);
+    border: 1px solid rgba(14, 165, 233, 0.2);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cta-section:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.2);
+}
+
+.cta-content {
+    position: relative;
+    z-index: 1;
 }
 
 .cta-title {
     color: var(--text);
     margin: 0 0 1.5rem 0;
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 800;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradient-shift 3s ease infinite;
 }
 
 .cta-text {
     color: var(--text-muted);
-    margin: 0;
+    margin: 0 auto;
     font-size: 1.25rem;
     line-height: 1.6;
+    max-width: 600px;
+}
+
+/* Pulse Animation */
+@keyframes pulse-ring {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(2);
+        opacity: 0;
+    }
+}
+
+@keyframes pulse-dot {
+    0% {
+        transform: scale(0.8);
+    }
+    50% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0.8);
+    }
+}
+
+.cta-animation {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.pulse-dot {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: var(--primary);
+    border-radius: 50%;
+    animation: pulse-dot 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) infinite;
+}
+
+.pulse-ring {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
 }
 
 /* Footer */
@@ -170,75 +336,263 @@
     font-size: 1rem;
 }
 
-/* Metric Cards */
+/* Enhanced Metric Cards */
 .metric-card {
     background: var(--bg-card);
-    border-radius: 16px;
-    padding: 2rem;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
     text-align: center;
-    border: 1px solid rgba(69, 196, 175, 0.2);
+    border: 1px solid rgba(14, 165, 233, 0.2);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    animation: fadeIn 0.6s ease-out;
+}
+
+.metric-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(14, 165, 233, 0.1),
+        transparent
+    );
+    transition: 0.6s;
+}
+
+.metric-card:hover::before {
+    left: 100%;
 }
 
 .metric-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 24px rgba(69, 196, 175, 0.2);
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.2);
+    border-color: var(--primary);
+    background: linear-gradient(145deg, 
+        rgba(14, 165, 233, 0.1),
+        rgba(30, 41, 59, 0.2)
+    );
 }
 
 .metric-value {
-    font-size: 2.5rem;
+    font-size: 3rem;
     font-weight: 800;
-    color: var(--primary);
-    margin-bottom: 0.75rem;
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    background-size: 200% 200%;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: gradient-shift 3s ease infinite;
+    transition: all 0.4s ease;
+}
+
+.metric-card:hover .metric-value {
+    transform: scale(1.1);
+    letter-spacing: 0.025em;
 }
 
 .metric-label {
-    color: var(--text);
+    color: var(--text-muted);
     font-size: 1.25rem;
     font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    display: inline-block;
 }
 
-/* Custom Button Styling */
-.custom-button {
+.metric-card:hover .metric-label {
+    color: var(--text);
+    transform: translateY(-2px);
+}
+
+.metric-label::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -4px;
+    left: 50%;
+    background: var(--primary);
+    transition: all 0.3s ease;
+}
+
+.metric-card:hover .metric-label::after {
+    width: 100%;
+    left: 0;
+}
+
+/* Enhanced Buttons */
+.stButton > button {
     background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
     border: none !important;
-    color: white !important;
-    padding: 1rem 2rem !important;
+    padding: 0.75rem 2rem !important;
     border-radius: 12px !important;
     font-weight: 600 !important;
-    font-size: 1.1rem !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 12px rgba(69, 196, 175, 0.2) !important;
+    letter-spacing: 0.025em !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.2),
+                0 2px 4px -1px rgba(14, 165, 233, 0.1) !important;
 }
 
-.custom-button:hover {
+.stButton > button:hover {
     transform: translateY(-2px) !important;
-    box-shadow: 0 8px 24px rgba(69, 196, 175, 0.3) !important;
+    box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.3),
+                0 10px 10px -5px rgba(14, 165, 233, 0.2) !important;
+    filter: brightness(1.1) !important;
 }
 
-/* Animations */
+/* Enhanced Animations */
 @keyframes gradient-shift {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
 }
 
-/* Text Area Styling */
-.stTextArea > div > div {
-    background-color: var(--bg-card) !important;
-    border-color: rgba(69, 196, 175, 0.2) !important;
-    border-radius: 12px !important;
-    padding: 1rem !important;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
-.stTextArea > div > div:focus-within {
+@keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+/* Base Styles */
+.stApp {
+    background: linear-gradient(135deg, var(--bg), var(--secondary));
+}
+
+/* Enhanced Form Elements */
+.stTextArea > div > div,
+.stTextInput > div > div > input,
+.stSelectbox > div > div {
+    background-color: var(--bg-card) !important;
+    border: 1px solid rgba(14, 165, 233, 0.1) !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    backdrop-filter: blur(12px) !important;
+    color: var(--text) !important;
+}
+
+.stTextArea > div > div:focus-within,
+.stTextInput > div > div > input:focus,
+.stSelectbox > div > div:focus-within {
     border-color: var(--primary) !important;
-    box-shadow: 0 0 0 1px var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2) !important;
+    transform: translateY(-2px) !important;
+    background: linear-gradient(145deg, 
+        rgba(14, 165, 233, 0.1),
+        rgba(30, 41, 59, 0.2)
+    ) !important;
+}
+
+/* Placeholder styling */
+.stTextArea > div > div::placeholder,
+.stTextInput > div > div > input::placeholder {
+    color: var(--text-muted) !important;
+    opacity: 0.7 !important;
+    transition: all 0.3s ease !important;
+}
+
+.stTextArea > div > div:focus::placeholder,
+.stTextInput > div > div > input:focus::placeholder {
+    opacity: 0.5 !important;
+    transform: translateX(4px) !important;
+}
+
+/* Label animations */
+.stTextArea label,
+.stTextInput label,
+.stSelectbox label {
+    color: var(--text-muted) !important;
+    font-size: 0.9rem !important;
+    transition: all 0.3s ease !important;
+}
+
+.stTextArea:focus-within label,
+.stTextInput:focus-within label,
+.stSelectbox:focus-within label {
+    color: var(--primary) !important;
+    transform: translateY(-2px) !important;
+}
+
+/* Checkbox enhancements */
+.stCheckbox > div > div > div {
+    border: 2px solid rgba(14, 165, 233, 0.3) !important;
+    border-radius: 6px !important;
+    transition: all 0.3s ease !important;
+}
+
+.stCheckbox > div > div > div:hover {
+    border-color: var(--primary) !important;
+    transform: scale(1.05) !important;
+}
+
+.stCheckbox > div > div > div[data-checked="true"] {
+    background: linear-gradient(135deg, var(--primary), var(--accent)) !important;
+    border-color: transparent !important;
+    animation: scaleIn 0.2s ease-out !important;
+}
+
+/* Loading States */
+.loading-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--bg-card) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        var(--bg-card) 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 2s infinite linear;
+}
+
+/* Micro Interactions */
+.hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 20px -5px rgba(14, 165, 233, 0.2);
+}
+
+/* Progress Bars */
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, var(--primary), var(--accent)) !important;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* Logo Animation */
+.logo-container {
+    animation: fadeIn 1s ease-out;
+    transition: all 0.3s ease;
+}
+
+.logo-container:hover {
+    transform: scale(1.05) rotate(5deg);
 }
 
 /* Checkbox Styling */
